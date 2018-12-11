@@ -5,8 +5,9 @@ import base64
 import threading
 import time
 import win32gui
-import PIL
+#import PIL
 import win32api
+import win32con
 import random
 
 from tkinter import scrolledtext
@@ -16,9 +17,10 @@ from PIL import ImageGrab
 from PIL import Image
 
 
+
 window = tk.Tk()  # 创建一个窗口
-window.title('帝国霸略辅助程序')
-window.geometry('600x400+0+0')  # 窗口的位置以及大小
+window.title('帝国霸略辅助程序-BY Guohao')
+window.geometry('600x400+1500+50')  # 窗口的位置以及大小
 
 
 
@@ -48,15 +50,93 @@ f.close()
 fun_var = tk.IntVar()
 fun_text = ''
 
-def move_click(x, y, t=0):  # 移动鼠标并点击左键
-    win32api.SetCursorPos((x, y))  # 设置鼠标位置(x, y)
-    win32api.mouse_event(win32api.MOUSEEVENTF_LEFTDOWN |
-                         win32api.MOUSEEVENTF_LEFTUP, x, y, 0, 0)  # 点击鼠标左键
+adv_hash = '000080008000800080008000dfbf8bffdff7dfffdbffdfff96fb800080008000'
+
+def click():
+    global is_click
+    if not is_click:
+        is_click = True
+        button_var.set('停止')
+        label.config(text=fun_text + ' 已经开始')
+        for rb in rb_list:  # 将选项锁定
+            rb.config(state='disabled')
+        #button_adjust.config(state='disabled')
+        start_mission()
+    else:
+        is_click = False
+        button_var.set('开始')
+        label.config(text=fun_text + ' 已经停止')
+        for rb in rb_list:
+            rb.config(state='active')
+        #button_adjust.config(state='active')
+        stop_mission()
+
+#执行擦任务
+def menu_click(x, y, t=0):  # 移动鼠标并点击左键
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN |
+                         win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)  # 点击鼠标左键
     if t == 0:
         time.sleep(random.random()*2+1)  # sleep一下
     else:
         time.sleep(t)
     return 0
+
+def move_click(x, y, t=0):  # 移动鼠标并点击左键
+    win32api.SetCursorPos((x, y))  # 设置鼠标位置(x, y)
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN |
+                         win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)  # 点击鼠标左键
+    if t == 0:
+        time.sleep(random.random()*2+1)  # sleep一下
+    else:
+        time.sleep(t)
+    return 0
+
+def move(x, y, t=0):  # 移动鼠标并点击左键
+    win32api.SetCursorPos((x, y))  # 设置鼠标位置(x, y)
+    #win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)  # 点击鼠标左键
+    if t == 0:
+        time.sleep(random.random()*2+1)  # sleep一下
+    else:
+        time.sleep(t)
+    return 0
+
+#鼠标滚轮
+def mouse_wheel(x, y, t=0):  # 移动鼠标并点击左键
+    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -2);  # 设置鼠标中键滚动
+    #win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)  # 点击鼠标左键
+    if t == 0:
+        time.sleep(random.random()*2+1)  # sleep一下
+    else:
+        time.sleep(t)
+    return 0
+
+
+#显示图片
+def show_click():
+    move(342,592);
+    mouse_wheel(342,592);
+    show_imge(61, 580, 118, 606);
+
+#援助盟友
+def help_click():
+    #点击帮助
+    move_click(1431,648);
+    #全部帮助
+    move_click(736, 182);
+    show_imge();
+
+#冒险
+def adventure_click():
+    move(342,592);
+    mouse_wheel(342,592);
+    menu_click(342,592);
+    move_click(912, 545);
+    move_click(78, 70);
+    #win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -2);
+
+#清除间谍
+def spy_click():
+    move_click(1420,717);
 
 #功能选择
 def print_selection():
@@ -97,6 +177,27 @@ rb_list = [rb1, rb2, rb3, rb4, rb5]
 button_var = tk.StringVar()
 button_var.set('开始')
 is_click = False
+
+#
+button = tk.Button(window, textvariable=button_var, width=10, height=1, command=click)
+button.place(x=140, y=60)
+
+button_image = tk.Button(window, text='图片', width=10, height=1, command=show_click)
+button_image.place(x=140, y=100)
+
+button_image = tk.Button(window, text='援助盟友', width=10, height=1, command=help_click)
+button_image.place(x=140, y=140)
+
+button_adventure = tk.Button(window, text='冒险', width=10, height=1, command=adventure_click)
+button_adventure.place(x=240, y=60)
+
+
+#文本显示
+text = scrolledtext.ScrolledText(window, width=29, height=17)  # 滚动输出文本框
+# text = tk.Text(window, width=29, height=17)  # 输出文本框
+text.place(x=15, y=180)
+
+
 
 def get_window_info():  # 获取阴阳师窗口信息
     wdname = u'帝国霸略'
@@ -150,55 +251,45 @@ def stop_mission():
     text.insert('end', time.strftime('%H:%M:%S', time.localtime()) + ' 停止执行\n')
     text.see('end')  # 自动显示底部
 
-
-def click():
-    global is_click
-    if not is_click:
-        is_click = True
-        button_var.set('停止')
-        label.config(text=fun_text + ' 已经开始')
-        for rb in rb_list:  # 将选项锁定
-            rb.config(state='disabled')
-        #button_adjust.config(state='disabled')
-        start_mission()
-    else:
-        is_click = False
-        button_var.set('开始')
-        label.config(text=fun_text + ' 已经停止')
-        for rb in rb_list:
-            rb.config(state='active')
-        #button_adjust.config(state='active')
-        stop_mission()
-
-button = tk.Button(window, textvariable=button_var, width=10,
-                   height=1, command=click)
-button.place(x=140, y=60)
-
-#文本显示
-
-text = scrolledtext.ScrolledText(window, width=29, height=17)  # 滚动输出文本框
-# text = tk.Text(window, width=29, height=17)  # 输出文本框
-text.place(x=15, y=180)
-
 def get_posx(x, window_size):  # 返回x相对坐标
-    return (window_size[0] + x)
-    #return (window_size[2] - window_size[0]) * x / 870
+    #return (window_size[0] + x)
+    return (window_size[2] - window_size[0]) * x / 1483
 
 
 def get_posy(y, window_size):  # 返回y相对坐标
-    return (window_size[1] + y)
-    #return (window_size[3] - window_size[1]) * y / 520
+    #return (window_size[1] + y)
+    return (window_size[3] - window_size[1]) * y / 941
 
-window_size = get_window_info()
-topx = window_size[0]
-topy = window_size[1]
-print(window_size[0],window_size[1])
-print(window_size[2],window_size[3])
 
-img_ready = ImageGrab.grab((topx + get_posx(27, window_size), topy + get_posy(316, window_size),
+def show_imge(x1,y1,x2,y2):
+    window_size = get_window_info()
+    topx = window_size[0]
+    topy = window_size[1]
+    print(window_size[0],window_size[1])
+    print(window_size[2],window_size[3])
+
+    img_ready = ImageGrab.grab((topx + get_posx(x1, window_size), topy + get_posy(y1, window_size),
+                            topx + get_posx(x2, window_size), topy + get_posy(y2, window_size)))
+
+    now_adv_hash = get_hash(img_ready)
+    print(adv_hash)
+
+    if hamming(adv_hash, now_adv_hash):
+        img_ready.show()
+    #查看图片
+
+
+def show_imge2(x1,y1,x2,y2):
+    window_size = get_window_info()
+    topx = window_size[0]
+    topy = window_size[1]
+    print(window_size[0],window_size[1])
+    print(window_size[2],window_size[3])
+
+    img_ready = ImageGrab.grab((topx + get_posx(27, window_size), topy + get_posy(316, window_size),
                             topx + get_posx(67, window_size), topy + get_posy(364, window_size)))
-#查看图片
-img_ready.show()
+    #查看图片
+    img_ready.show()
 
 
 
@@ -268,6 +359,9 @@ def yu_ling(window_size):
                 break
             continue
 
-#window.mainloop()
+window.mainloop()
 
 #https://blog.csdn.net/zydarChen/article/details/77587967
+if __name__ == "__main__":
+    print("start")
+
